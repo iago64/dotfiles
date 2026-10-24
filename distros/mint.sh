@@ -76,7 +76,6 @@ corepack enable pnpm
 sudo flatpak remote-add --if-not-exists flathub \
     https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak install -y --noninteractive flathub \
-    com.discordapp.Discord \
     com.usebruno.Bruno \
     com.obsproject.Studio \
     org.libretro.RetroArch \
@@ -112,3 +111,11 @@ toolbox_url="$(curl -fsSL \
     'https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release' |
     jq -er '.TBA[0].downloads.linux.link')"
 curl -fsSL "$toolbox_url" | sudo tar -xzC /opt
+
+# Instalar Discord de forma nativa (.deb)
+discord_deb="$(mktemp --suffix=.deb)"
+trap 'rm -f -- "$discord_deb"' EXIT
+curl -fsSL "https://discord.com/api/download?platform=linux&format=deb" -o "$discord_deb"
+sudo apt-get install -y "$discord_deb"
+rm -f -- "$discord_deb"
+trap - EXIT
