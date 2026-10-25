@@ -55,7 +55,9 @@ fi
 if [[ ! -d "$HOME/.sdkman" ]]; then
     curl -fsSL "https://get.sdkman.io" | bash
     # shellcheck disable=SC1091
+    set +u
     source "$HOME/.sdkman/bin/sdkman-init.sh"
+    set -u
     sdk install java 21.0.10-amzn
     sdk install java 25.0.2-amzn
     sdk install quarkus
