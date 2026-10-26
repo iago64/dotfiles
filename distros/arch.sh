@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
+
 sudo pacman -Syu --noconfirm
 sudo pacman -S --needed --noconfirm \
     vim emacs nano strace openssh curl htop tree wget terminator xclip bless \
@@ -38,6 +40,7 @@ if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
         "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
+        configure_zsh_environment
 # Install JetBrains Toolbox without launching its GUI during setup.
 toolbox_url="$(curl -fsSL \
     'https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release' |

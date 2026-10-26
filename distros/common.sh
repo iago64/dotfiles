@@ -4,7 +4,13 @@ configure_zsh_environment() {
     local zshrc="$HOME/.zshrc"
     local marker="# --- Entorno personalizado de dotfiles ---"
 
+    local template="$HOME/.oh-my-zsh/templates/zshrc.zsh-template"
+
     if ! grep -Fqx "$marker" "$zshrc" 2>/dev/null; then
+        if [[ -f "$template" ]]; then
+            [[ -f "$zshrc" ]] && cp -- "$zshrc" "$zshrc.pre-dotfiles.bak"
+            cp -- "$template" "$zshrc"
+        fi
         cat >> "$zshrc" <<'EOF'
 
 # --- Entorno personalizado de dotfiles ---
