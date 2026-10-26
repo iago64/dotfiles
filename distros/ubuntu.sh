@@ -40,17 +40,18 @@ if [[ -n "$package_id" ]]; then
 fi
 
 # SDKMAN manages Java, Quarkus and Gradle independently of the OS packages.
-if [[ ! -d "$HOME/.sdkman" ]]; then
+if [[ ! -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
+    rm -rf "$HOME/.sdkman"
     curl -fsSL "https://get.sdkman.io" | bash
-    set +u
-    # shellcheck disable=SC1091
-    source "$HOME/.sdkman/bin/sdkman-init.sh"
-    set -u
-    sdk install java 21.0.10-amzn
-    sdk install java 25.0.2-amzn
-    sdk install quarkus
-    sdk install gradle
 fi
+set +u
+# shellcheck disable=SC1091
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 21.0.10-amzn
+sdk install java 25.0.2-amzn
+sdk install quarkus
+sdk install gradle
+set -u
 
 if [[ ! -d "$HOME/.nvm" ]]; then
     curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash

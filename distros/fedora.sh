@@ -52,17 +52,18 @@ if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
 fi
 
 # SDKMAN manages Java, Quarkus and Gradle independently of the OS packages.
-if [[ ! -d "$HOME/.sdkman" ]]; then
+if [[ ! -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
+    rm -rf "$HOME/.sdkman"
     curl -fsSL "https://get.sdkman.io" | bash
-    # shellcheck disable=SC1091
-    set +u
-    source "$HOME/.sdkman/bin/sdkman-init.sh"
-    set -u
-    sdk install java 21.0.10-amzn
-    sdk install java 25.0.2-amzn
-    sdk install quarkus
-    sdk install gradle
 fi
+set +u
+# shellcheck disable=SC1091
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 21.0.10-amzn
+sdk install java 25.0.2-amzn
+sdk install quarkus
+sdk install gradle
+set -u
 configure_zsh_environment
 
 # Install JetBrains Toolbox without launching its GUI during setup.
