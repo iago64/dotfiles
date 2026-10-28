@@ -128,8 +128,5 @@ if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
 fi
 configure_zsh_environment
 
-# Install JetBrains Toolbox without launching its GUI during setup.
-toolbox_url="$(curl -fsSL \
-    'https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release' |
-    jq -er '.TBA[0].downloads.linux.link')"
-curl -fsSL "$toolbox_url" | sudo tar -xzC /opt
+# Install JetBrains Toolbox and launch it once if a graphical session exists.
+install_jetbrains_toolbox
