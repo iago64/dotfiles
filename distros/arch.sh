@@ -8,7 +8,7 @@ sudo pacman -S --needed --noconfirm \
     vim emacs nano strace openssh curl htop tree wget terminator xclip bless \
     fastfetch net-tools valgrind meld bluez bluez-utils \
     base-devel gcc gdb python python-pip jdk21-openjdk cunit make cmake \
-    docker zsh jq
+    docker jq
 
 if [[ ! -d "$HOME/.nvm" ]]; then
     curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -35,11 +35,13 @@ if ! command -v yay >/dev/null 2>&1; then
     trap - EXIT
 fi
 
+# Install JetBrains Toolbox and launch it once if a graphical session exists.
+install_jetbrains_toolbox
+
+# zsh es lo ultimo que se instala.
+sudo pacman -S --needed --noconfirm zsh
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     RUNZSH=no KEEP_ZSHRC=yes sh -c \
         "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
-
-        configure_zsh_environment
-# Install JetBrains Toolbox and launch it once if a graphical session exists.
-install_jetbrains_toolbox
+configure_zsh_environment

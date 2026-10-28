@@ -9,7 +9,7 @@ sudo dnf install -y \
     fastfetch net-tools openssh-server valgrind meld jq \
     kernel-devel kernel-headers gcc gcc-c++ gdb python3 python3-pip \
     adoptium-temurin-java-repository dotnet-sdk-10.0 CUnit make cmake \
-    podman podman-compose zsh flatpak
+    podman podman-compose flatpak
 
 if [[ ! -d "$HOME/.nvm" ]]; then
     curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -46,11 +46,6 @@ flatpak install -y --noninteractive flathub \
     org.videolan.VLC \
     com.bitwarden.desktop
 
-if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-    RUNZSH=no KEEP_ZSHRC=yes sh -c \
-        "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
-
 # SDKMAN manages Java, Quarkus and Gradle independently of the OS packages.
 if [[ ! -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
     rm -rf "$HOME/.sdkman"
@@ -64,7 +59,14 @@ sdk install java 25.0.2-amzn
 sdk install quarkus
 sdk install gradle
 set -u
-configure_zsh_environment
 
 # Install JetBrains Toolbox and launch it once if a graphical session exists.
 install_jetbrains_toolbox
+
+# zsh es lo ultimo que se instala.
+sudo dnf install -y zsh
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    RUNZSH=no KEEP_ZSHRC=yes sh -c \
+        "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+configure_zsh_environment

@@ -119,14 +119,16 @@ sudo apt-get install -y \
 sudo systemctl enable --now docker
 sudo usermod -aG docker "${USER:?}"
 
-sudo apt-get install -y podman podman-compose zsh
+sudo apt-get install -y podman podman-compose
 systemctl --user enable --now podman.socket
 
+# Install JetBrains Toolbox and launch it once if a graphical session exists.
+install_jetbrains_toolbox
+
+# zsh es lo ultimo que se instala.
+sudo apt-get install -y zsh
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     RUNZSH=no KEEP_ZSHRC=yes sh -c \
         "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 configure_zsh_environment
-
-# Install JetBrains Toolbox and launch it once if a graphical session exists.
-install_jetbrains_toolbox

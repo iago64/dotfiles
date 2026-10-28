@@ -28,7 +28,7 @@ sudo apt-get install -y \
     aptitude vim emacs nano strace openssh-client curl htop tree wget terminator \
     xclip net-tools valgrind meld blueman gnupg zip jq ca-certificates \
     build-essential autotools-dev gcc gdb g++ python3 python3-pip \
-    libcunit1-dev libcunit1 make cmake podman podman-compose zsh flatpak
+    libcunit1-dev libcunit1 make cmake podman podman-compose flatpak
 
 # Configure Microsoft's Ubuntu repository for .NET and Visual Studio Code.
 repo_file="$(mktemp)"
@@ -103,12 +103,6 @@ sudo usermod -aG docker "${USER:?}"
 
 systemctl --user enable --now podman.socket
 
-if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-    RUNZSH=no KEEP_ZSHRC=yes sh -c \
-        "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
-configure_zsh_environment
-
 # Install JetBrains Toolbox and launch it once if a graphical session exists.
 install_jetbrains_toolbox
 
@@ -119,3 +113,11 @@ curl -fsSL "https://discord.com/api/download?platform=linux&format=deb" -o "$dis
 sudo apt-get install -y "$discord_deb"
 rm -f -- "$discord_deb"
 trap - EXIT
+
+# zsh es lo ultimo que se instala.
+sudo apt-get install -y zsh
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    RUNZSH=no KEEP_ZSHRC=yes sh -c \
+        "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+configure_zsh_environment
