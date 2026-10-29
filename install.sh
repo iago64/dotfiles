@@ -61,7 +61,19 @@ if [[ ! -x "$DISTRO_SCRIPT" ]]; then
 fi
 
 printf 'Instalando paquetes para %s con %s...\n' "${PRETTY_NAME:-$ID}" "$distro_script"
-"$DISTRO_SCRIPT"
+if bash -Eeuo pipefail -c '
+    error_trap() {
+        local status=$?
+        printf "Error en %s (linea %s): %s\n" "$1" "$2" "$3" >&2
+        exit "$status"
+    }
+    trap "error_trap \"\$1\" \"\$LINENO\" \"\$BASH_COMMAND\"" ERR
+    source "$1"
+' "$DISTRO_SCRIPT" "$DISTRO_SCRIPT"; then
+    :
+else
+    exit $?
+fi
 
 if [[ ! -d "$COMMON_DIR" ]]; then
     printf 'No existe el directorio de configuraciones compartidas: %s\n' "$COMMON_DIR" >&2
