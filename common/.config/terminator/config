@@ -1,0 +1,25 @@
+[global_config]
+  title_hide_sizetext = True
+  inactive_color_offset = 0.85
+[keybindings]
+[profiles]
+  [[default]]
+    use_system_font = False
+    font = Monospace 11
+    background_color = "#1e1e1e"
+    foreground_color = "#d4d4d4"
+    cursor_color = "#aeafad"
+    palette = "#000000:#cd3131:#0dbc79:#e5e510:#2472c8:#bc3fbc:#11a8cd:#e5e5e5:#666666:#f14c4c:#23d18b:#f5f543:#3b8eea:#d670d6:#29b8db:#ffffff"
+    scrollback_infinite = True
+    copy_on_selection = True
+    show_titlebar = False
+[layouts]
+  [[default]]
+    [[[window0]]]
+      type = Window
+      parent = ""
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+      profile = default
+[plugins]

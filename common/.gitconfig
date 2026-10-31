@@ -1,0 +1,31 @@
+# Gestionado por dotfiles (common/.gitconfig).
+# Ajustes propios de una maquina (otra identidad, credenciales): ~/.gitconfig.local
+[user]
+	name = Damian Facchini
+	email = facchinidm@gmail.com
+[init]
+	defaultBranch = main
+[core]
+	editor = vim
+	autocrlf = input
+[pull]
+	rebase = true
+[rebase]
+	autoStash = true
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[merge]
+	tool = meld
+	conflictStyle = zdiff3
+[diff]
+	tool = meld
+	colorMoved = default
+[alias]
+	st = status -sb
+	co = checkout
+	br = branch
+	lg = log --graph --oneline --decorate --all
+[include]
+	path = ~/.gitconfig.local

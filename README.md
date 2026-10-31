@@ -1,131 +1,129 @@
 # Dotfiles
 
-Este repositorio automatiza la preparacion de un entorno de trabajo en Linux.
-Incluye scripts para instalar herramientas segun la distribucion y un
-instalador que enlaza configuraciones personales guardadas en `common/` dentro
-del directorio `$HOME`.
+Prepara el mismo entorno de trabajo en **Ubuntu (y derivadas), Linux Mint,
+Fedora y Arch (y derivadas)**: mismas herramientas, mismas versiones de los
+runtimes y la misma configuracion personal. Debian puro y la familia RHEL
+(RHEL, Rocky, Alma, CentOS) no estan soportados y el instalador los rechaza.
+
+## Uso rapido
+
+```bash
+git clone https://github.com/iago64/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./install.sh          # instala todo
+./verify.sh           # comprueba que no falte nada
+```
+
+Ejecutalo con tu usuario, no como root: pide `sudo` una vez y mantiene la
+sesion mientras dura la instalacion. Al terminar, cerra sesion y volve a
+entrar para usar zsh.
+
+Opciones de `install.sh`:
+
+| Opcion | Efecto |
+| --- | --- |
+| `--no-upgrade` | No actualiza el sistema antes de instalar. |
+| `--cli` | Omite los modulos graficos (`desktop`, `vscode`, `apps`, `jetbrains`). |
+| `--only m1,m2` | Ejecuta solo esos modulos. |
+| `--skip m1,m2` | Omite esos modulos. |
+| `--dry-run` | Muestra que se instalaria en esta distro, sin cambiar nada. |
+
+Se puede volver a ejecutar las veces que haga falta: cada modulo detecta lo
+que ya esta hecho. Si un modulo falla, los demas siguen y al final se indica
+cuales fallaron y como reintentarlos (`./install.sh --only ...`). El log de
+cada ejecucion queda en `~/.local/state/dotfiles/`.
+
+## Que se instala
+
+| Modulo | Contenido | Como |
+| --- | --- | --- |
+| `base` | git, curl, wget, jq, zip/unzip, tree, htop, fastfetch, vim, nano, strace, net-tools, xclip, gnupg, cliente y servidor SSH (sshd queda apagado) | Gestor de paquetes. En Ubuntu 24.04 fastfetch viene de la PPA oficial del proyecto. aptitude solo en Ubuntu/Mint. |
+| `toolchain` | gcc/g++, make, cmake, autotools, gdb, valgrind, CUnit, Python 3 + pip | Gestor de paquetes |
+| `desktop` | Terminator, Meld, GHex | Gestor de paquetes |
+| `containers` | Podman y podman-compose (unico motor de contenedores) | Gestor de paquetes |
+| `dotnet` | .NET SDK 10 | Repos nativos en Fedora y Arch; repo de Microsoft en Ubuntu/Mint con un pin de APT que solo deja entrar .NET y VS Code |
+| `java` | Java 21 y 25 (Amazon Corretto, ultima build), Gradle y Quarkus | SDKMAN |
+| `node` | Node.js 24 y pnpm | nvm + corepack |
+| `vscode` | Visual Studio Code | Repo oficial de Microsoft (apt/rpm); AUR en Arch |
+| `apps` | Discord, OBS, VLC, Bruno, Bitwarden | Paquete nativo si existe; si no, Flatpak (Flathub). En Fedora habilita RPM Fusion y cambia ffmpeg-free por ffmpeg. |
+| `jetbrains` | JetBrains Toolbox | Descarga oficial en `/opt/jetbrains-toolbox`; despues se actualiza solo |
+| `zsh` | Zsh, Oh My Zsh, zsh-autosuggestions y zsh-syntax-highlighting, como shell por defecto | Gestor de paquetes + git |
+| `dotfiles` | Enlaces de `common/` en `$HOME` | Ver abajo |
+
+Las versiones se definen una sola vez en `versions.env` (Node, Java, .NET,
+nvm) y los nombres de paquete por distro en `packages.txt`.
 
 ## Estructura
 
 ```text
-.
-├── install.sh
-└── distros/
-    ├── common.sh
-    ├── ubuntu.sh
-    ├── mint.sh
-    ├── fedora.sh
-    ├── arch.sh
-    ├── ubuntu-network-manager.sh
-    └── arch-hyprland.sh
+install.sh          orquestador: opciones, deteccion, log y ejecucion de modulos
+verify.sh           comprueba el entorno e imprime herramienta -> version
+versions.env        versiones de los runtimes
+packages.txt        manifiesto de paquetes: nombre en apt, dnf, pacman y Flatpak
+lib/                funciones compartidas (log, deteccion de distro, paquetes)
+adapters/           una por familia: debian (Ubuntu/Mint), fedora, arch
+modules/            un archivo por modulo, en el orden de install.sh
+common/             configuracion personal que se enlaza en $HOME
+ci/                 preparacion de contenedores para el CI
+.github/workflows/  CI: shellcheck, shfmt e instalacion en las cuatro distros
 ```
 
-- `install.sh` detecta la distribucion a partir de `/etc/os-release`, selecciona
-  el instalador correspondiente y, al terminar, enlaza el contenido de
-  `common/` en `$HOME`.
-- `distros/*.sh` contiene la instalacion de paquetes y herramientas especifica
-  de cada familia de distribuciones.
-- `distros/common.sh` define las funciones compartidas: la configuracion del
-  entorno de Zsh y la instalacion de JetBrains Toolbox (se descomprime en
-  `/opt` y, si hay sesion grafica, se inicia en segundo plano para que se
-  autoinstale y cree su entrada de menu).
-- `common/` es el lugar para agregar los archivos y directorios de
-  configuracion personales. Por ejemplo, `common/.bashrc` termina en
-  `~/.bashrc`, y `common/.config/mi-app/` se integra en `~/.config/mi-app/`.
+## Agregar o cambiar una herramienta
 
-## Instalacion
+- **Un paquete del sistema:** agrega una fila en `packages.txt` con el nombre
+  en cada gestor. Usa `-` donde no exista; en Arch, `aur:<paquete>` lo instala
+  desde AUR. Para una app de escritorio (modulo `apps`) completa tambien la
+  columna Flatpak, que se usa cuando no hay paquete nativo.
+- **Una version de runtime:** cambia `versions.env`.
+- **Algo que no es un paquete:** crea `modules/<nombre>.sh` con una funcion
+  `module_main`, agregalo a `ALL_MODULES` (y a `MODULE_DESC`) en `install.sh`
+  y suma su comprobacion en `verify.sh`.
 
-1. Clona el repositorio en Linux y revisa los scripts de la distribucion que
-   usas.
-2. Agrega las configuraciones que quieras gestionar bajo `common/`. El
-   instalador requiere que ese directorio exista: en el estado actual del
-   repositorio aun no esta incluido, por lo que hay que crearlo antes de
-   ejecutar el instalador.
-3. Ejecuta desde la raiz del repositorio:
+Despues, `./install.sh --dry-run` muestra como se resuelve en tu distro.
 
-   ```bash
-   ./install.sh
-   ```
+## Configuracion personal (`common/`)
 
-El instalador necesita Bash y privilegios `sudo` para las operaciones del
-sistema. Actualiza paquetes, agrega repositorios y claves de terceros, instala
-software, habilita servicios y puede modificar grupos de usuario. Para
-entender exactamente que hara en tu sistema, lee primero `install.sh` y el
-script de `distros/` que corresponda.
+Todo lo que esta en `common/` se refleja en `$HOME`: los archivos se enlazan
+simbolicamente y los directorios se crean, sin tocar lo demas que ya haya en,
+por ejemplo, `~/.config`. Si algo choca, se mueve a un respaldo
+`<archivo>.backup-<fecha>` antes de enlazar.
 
-### Deteccion de distribucion
-
-`install.sh` usa `ID` e `ID_LIKE` de `/etc/os-release` para elegir un script:
-
-| Distribucion detectada | Script |
+| Archivo | Uso |
 | --- | --- |
-| Linux Mint (`linuxmint`) | `distros/mint.sh` |
-| Ubuntu o Debian, y derivadas de Ubuntu/Debian | `distros/ubuntu.sh` |
-| Fedora, y derivadas de Fedora/RHEL | `distros/fedora.sh` |
-| Arch Linux, y derivadas de Arch | `distros/arch.sh` |
+| `.zshrc` | Oh My Zsh, plugins, historial. Ajustes de una maquina: `~/.zshrc.local`. |
+| `.config/dotfiles/env.sh` | Entorno compartido por bash y zsh: nvm, pnpm, SDKMAN y .NET. A `~/.bashrc` solo se le agrega una linea que lo carga. |
+| `.gitconfig` | Identidad, alias, meld como herramienta de merge/diff. Ajustes de una maquina: `~/.gitconfig.local`. |
+| `.config/terminator/config` | Fuente, colores y scroll infinito. |
+| `.config/Code/User/` | `settings.json` y `keybindings.json` de VS Code. |
 
-Si no puede identificar una familia soportada, termina con un error. El
-instalador de Mint es independiente porque necesita la version base de Ubuntu
-para configurar sus repositorios.
+Como son enlaces, los cambios que hagas desde las aplicaciones (por ejemplo
+en la configuracion de VS Code) quedan en el repo y se pueden commitear.
 
-## Que instala
+## Verificacion y CI
 
-Los scripts incluyen, segun la distribucion, herramientas de desarrollo y
-sistema como compiladores, depuradores, Python, editores, utilidades de red,
-Docker o Podman, Zsh, Node.js y aplicaciones de escritorio. Tambien configuran
-fuentes oficiales de paquetes cuando hace falta. Los detalles y las diferencias
-estan en cada script:
+`./verify.sh` (o `./verify.sh --cli` sin las herramientas graficas) lista cada
+herramienta con su version y termina con error si falta algo. La salida
+deberia ser la misma en cualquier distro.
 
-- `distros/ubuntu.sh`: paquetes APT, .NET 10, SDKMAN (Java, Quarkus y Gradle),
-  NVM con Node.js 24 y pnpm, Docker, Podman, Zsh/Oh My Zsh, aplicaciones Snap
-  disponibles y JetBrains Toolbox. Si Snap no esta instalado, omite esa parte.
-- `distros/mint.sh`: paquetes APT, .NET 10, Visual Studio Code, SDKMAN, NVM con
-  Node.js 24 y pnpm, Docker, Podman, Zsh/Oh My Zsh, aplicaciones de Flathub,
-  JetBrains Toolbox y Discord. Usa repositorios Ubuntu en lugar de los de Mint.
-- `distros/fedora.sh`: paquetes DNF, .NET 10, Visual Studio Code, NVM con
-  Node.js 24 y pnpm, Podman, aplicaciones de Flathub, SDKMAN y JetBrains
-  Toolbox.
-- `distros/arch.sh`: paquetes de Pacman, Java 21, NVM con Node.js 22 y pnpm,
-  Docker, Zsh/Oh My Zsh, `yay` (si no esta instalado) y JetBrains Toolbox.
+El workflow de GitHub Actions pasa `shellcheck` y `shfmt` y, en contenedores
+de Ubuntu 24.04, Linux Mint 22, Fedora y Arch, ejecuta `install.sh --cli` dos
+veces (para comprobar que es idempotente) y despues `verify.sh --cli`.
 
-La seleccion de paquetes y versiones puede cambiar; consulta el script antes
-de ejecutarlo. La instalacion de paquetes suele requerir conexion a Internet.
+## Notas para maquinas ya instaladas con la version anterior
 
-## Enlaces de configuracion
+El instalador no desinstala nada; avisa lo que quedo de antes:
 
-El instalador recorre las entradas inmediatas de `common/` y las refleja bajo
-`$HOME`:
+- **Docker Engine** ya no se instala (solo Podman). Si no lo usas:
+  `sudo systemctl disable --now docker` y desinstala `docker-ce`.
+- **Snaps** de Discord, OBS, VLC y VS Code en Ubuntu, y el **.deb de Discord**
+  en Mint, quedan duplicados con las versiones nuevas: `sudo snap remove ...`
+  o `sudo apt remove discord`.
+- Las carpetas versionadas `/opt/jetbrains-toolbox-*` de la version anterior
+  se pueden borrar.
+- Emacs, RetroArch y blueman ya no forman parte del entorno.
+- Si el repo de Microsoft habia reemplazado paquetes de Ubuntu (por ejemplo
+  `containernetworking-plugins`), el modulo `dotnet` los vuelve a la version
+  de Ubuntu.
 
-- Los archivos se enlazan simbolicamente.
-- Los directorios se crean en el destino y se procesan recursivamente. Esto
-  conserva otros archivos que ya existan en directorios como `~/.config`.
-- Si el destino ya es el enlace correcto, no hace cambios.
-- Si hay un archivo, enlace o directorio incompatible en el destino, lo mueve
-  a un respaldo con sufijo `.backup-<fecha>-<pid>` antes de crear el enlace o
-  integrar el contenido.
-- `.gitkeep` se omite.
-
-Volver a ejecutar `./install.sh` vuelve a intentar instalar/configurar los
-paquetes y a sincronizar los enlaces. No es solamente un comando de enlaces.
-
-## Scripts opcionales
-
-Estos scripts no se ejecutan desde `install.sh`; se deben revisar y lanzar
-manualmente desde la raiz del repositorio cuando se necesiten:
-
-- `distros/ubuntu-network-manager.sh` reemplaza la configuracion de Netplan
-  para usar NetworkManager, aplica el cambio y reinicia el servicio. Puede
-  interrumpir la conexion de red actual.
-- `distros/arch-hyprland.sh` actualiza Arch, instala Hyprland y el paquete
-  `ml4w-hyprland` desde AUR mediante `yay`. Requiere que `distros/arch.sh` ya
-  haya instalado `yay`.
-
-## Zsh
-
-Los instaladores de las distribuciones que preparan Zsh instalan Oh My Zsh y
-llaman a `configure_zsh_environment`, definida en `distros/common.sh`. La
-funcion agrega una seccion identificada por un marcador a `~/.zshrc`, con la
-carga de NVM, pnpm y SDKMAN. Si existe la plantilla de Oh My Zsh, la usa como
-base y, si ya existia un `.zshrc`, guarda una copia `.pre-dotfiles.bak` antes de
-reemplazarlo. El marcador evita agregar repetidamente la seccion en ejecuciones
-posteriores.
+Si clonas el repo en Windows, `.gitattributes` fuerza finales de linea LF
+para que los scripts funcionen al copiarlos a Linux.

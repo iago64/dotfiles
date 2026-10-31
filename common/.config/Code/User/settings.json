@@ -1,0 +1,23 @@
+{
+    "editor.fontSize": 14,
+    "editor.rulers": [100],
+    "editor.renderWhitespace": "boundary",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.minimap.enabled": false,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.autoSave": "onFocusChange",
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "telemetry.telemetryLevel": "off",
+    "workbench.startupEditor": "none",
+    "[makefile]": {
+        "editor.insertSpaces": false
+    },
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false
+    }
+}

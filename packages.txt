@@ -1,0 +1,50 @@
+# Manifiesto unico de paquetes del sistema.
+#
+# Columnas: modulo | nombre | apt (Ubuntu/Mint) | dnf (Fedora) | pacman (Arch) | flatpak
+#
+# - Varios paquetes en una celda se separan con espacios.
+# - "-" significa que no hay paquete nativo para esa familia.
+# - En la columna pacman, "aur:<paquete>" se instala desde AUR con yay.
+# - La columna flatpak solo la usa el modulo "apps": si no hay paquete nativo
+#   (o falla su instalacion) se instala ese ID desde Flathub.
+# - En "apps", el nombre es el comando que verify.sh busca.
+# - ${DOTNET_CHANNEL} se reemplaza por el valor de versions.env.
+#
+# modulo    | nombre          | apt                                      | dnf                            | pacman                       | flatpak
+base        | git             | git                                      | git                            | git                          | -
+base        | curl            | curl                                     | curl                           | curl                         | -
+base        | wget            | wget                                     | wget                           | wget                         | -
+base        | jq              | jq                                       | jq                             | jq                           | -
+base        | zip/unzip       | zip unzip                                | zip unzip                      | zip unzip                    | -
+base        | tree            | tree                                     | tree                           | tree                         | -
+base        | htop            | htop                                     | htop                           | htop                         | -
+base        | fastfetch       | fastfetch                                | fastfetch                      | fastfetch                    | -
+base        | vim             | vim                                      | vim-enhanced                   | vim                          | -
+base        | nano            | nano                                     | nano                           | nano                         | -
+base        | strace          | strace                                   | strace                         | strace                       | -
+base        | net-tools       | net-tools                                | net-tools                      | net-tools                    | -
+base        | xclip           | xclip                                    | xclip                          | xclip                        | -
+base        | gnupg           | gnupg                                    | gnupg2                         | gnupg                        | -
+base        | ca-certificates | ca-certificates                          | ca-certificates                | ca-certificates              | -
+base        | ssh (cliente)   | openssh-client                           | openssh-clients                | openssh                      | -
+base        | ssh (servidor)  | openssh-server                           | openssh-server                 | openssh                      | -
+base        | aptitude        | aptitude                                 | -                              | -                            | -
+toolchain   | compiladores    | build-essential gcc g++                  | gcc gcc-c++ make               | base-devel gcc               | -
+toolchain   | autotools       | autotools-dev autoconf automake libtool  | autoconf automake libtool      | autoconf automake libtool    | -
+toolchain   | gdb             | gdb                                      | gdb                            | gdb                          | -
+toolchain   | make/cmake      | make cmake                               | make cmake                     | make cmake                   | -
+toolchain   | valgrind        | valgrind                                 | valgrind                       | valgrind                     | -
+toolchain   | cunit           | libcunit1-dev                            | CUnit-devel                    | cunit                        | -
+toolchain   | python          | python3 python3-pip python3-venv         | python3 python3-pip            | python python-pip            | -
+desktop     | terminator      | terminator                               | terminator                     | terminator                   | -
+desktop     | meld            | meld                                     | meld                           | meld                         | -
+desktop     | ghex            | ghex                                     | ghex                           | ghex                         | -
+containers  | podman          | podman podman-compose                    | podman podman-compose          | podman podman-compose        | -
+dotnet      | dotnet          | dotnet-sdk-${DOTNET_CHANNEL}             | dotnet-sdk-${DOTNET_CHANNEL}   | dotnet-sdk                   | -
+vscode      | code            | code                                     | code                           | aur:visual-studio-code-bin   | -
+apps        | discord         | -                                        | discord                        | discord                      | com.discordapp.Discord
+apps        | obs             | obs-studio                               | obs-studio                     | obs-studio                   | com.obsproject.Studio
+apps        | vlc             | vlc                                      | vlc                            | vlc                          | org.videolan.VLC
+apps        | bruno           | -                                        | -                              | aur:bruno-bin                | com.usebruno.Bruno
+apps        | bitwarden       | -                                        | -                              | bitwarden                    | com.bitwarden.desktop
+zsh         | zsh             | zsh                                      | zsh                            | zsh                          | -

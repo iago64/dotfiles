@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar shellcheck y shfmt
+        run: sudo apt-get update && sudo apt-get install -y shellcheck shfmt
+      - name: shellcheck
+        run: shellcheck -x install.sh verify.sh ci/*.sh lib/*.sh adapters/*.sh modules/*.sh common/.config/dotfiles/env.sh
+      - name: shfmt
+        run: shfmt -d -i 4 -ci install.sh verify.sh ci/*.sh lib/*.sh adapters/*.sh modules/*.sh
+
+  install:
+    needs: lint
+    name: install (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu-24.04
+            image: ubuntu:24.04
+          - name: mint-22
+            image: linuxmintd/mint22-amd64
+          - name: fedora
+            image: fedora:latest
+          - name: arch
+            image: archlinux:latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar contenedor
+        run: bash ci/prepare-container.sh "$GITHUB_WORKSPACE"
+      # Perfil sin entorno grafico; se ejecuta dos veces para comprobar que es idempotente.
+      - name: install.sh --cli
+        run: sudo -u dev -H bash -c 'cd ~/dotfiles && ./install.sh --cli'
+      - name: install.sh --cli (segunda vez)
+        run: sudo -u dev -H bash -c 'cd ~/dotfiles && ./install.sh --cli --no-upgrade'
+      - name: verify.sh --cli
+        run: sudo -u dev -H bash -c 'cd ~/dotfiles && ./verify.sh --cli'

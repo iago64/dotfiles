@@ -1,0 +1,4 @@
+# Los scripts se ejecutan en Linux: siempre LF, aunque el repo se clone en Windows.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
